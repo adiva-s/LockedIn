@@ -160,6 +160,16 @@ chrome.storage.local.get(["sessions"], data => {
   const statsDiv = document.getElementById("stats")
   const totalSessions = sessions.length
 
+  const uniqueDays = new Set(
+    sessions.map(s => {
+      const d = new Date(s.date)
+      d.setHours(0,0,0,0)
+      return d.getTime()
+    })
+  )
+
+  const totalDays = uniqueDays.size
+
   let totalMinutes = 0
   sessions.forEach(s => { totalMinutes += s.duration || 0 })
 
@@ -169,23 +179,33 @@ chrome.storage.local.get(["sessions"], data => {
     : 0
 
   // Best day
-  const dayCounts = {}
+  // Best day based on TOTAL TIME
+  const dayTotals = {}
+
   sessions.forEach(s => {
     const day = new Date(s.date).toDateString()
-    dayCounts[day] = (dayCounts[day] || 0) + 1
+    dayTotals[day] = (dayTotals[day] || 0) + (s.duration || 0)
   })
 
   let bestDay = null
-  let maxSessions = 0
-  for(const day in dayCounts){
-    if(dayCounts[day] > maxSessions){
-      maxSessions = dayCounts[day]
+  let maxMinutes = 0
+
+  for(const day in dayTotals){
+    if(dayTotals[day] > maxMinutes){
+      maxMinutes = dayTotals[day]
       bestDay = day
     }
   }
 
+  const bestHours = Math.floor(maxMinutes / 60)
+  const bestMins = maxMinutes % 60
+
   const formattedBestDay = bestDay
     ? new Date(bestDay).toLocaleDateString("en-US", { month:"short", day:"numeric" })
+    : "N/A"
+
+  const bestDayText = bestDay
+    ? `${formattedBestDay} • ${bestHours ? bestHours + "h " : ""}${bestMins}m`
     : "N/A"
 
   const hours = Math.floor(totalMinutes / 60)
@@ -193,11 +213,10 @@ chrome.storage.local.get(["sessions"], data => {
 
   statsDiv.innerHTML = `
     <h2>📊 Stats</h2>
-    <p><strong>Total Sessions:</strong> ${totalSessions}</p>
+    <p><strong>Activity:</strong> ${totalDays} days • ${totalSessions} sessions</p>
     <p><strong>Total Focus Time:</strong> ${hours}h ${mins}m</p>
     <p><strong>Avg Session:</strong> ${avgMinutes} min</p>
-    <p><strong>Best Day:</strong> ${formattedBestDay} • ${maxSessions} sessions</p>
-  `
+    <p><strong>Best Day:</strong> ${bestDayText}</p>`
 
   const streak = calculateStreak(sessions)
   document.getElementById("streak").textContent = `🔥 ${streak} Day Streak`
