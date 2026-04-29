@@ -1,5 +1,7 @@
 # FocusLock
 A Chrome extension for distraction-free focus sessions, streak tracking, and accountability-driven productivity. 
+> Built and used daily — 40+ sessions logged, 
+> best day: 5 sessions · 274 min of focus.
 
 ## Screenshots
 <table>
