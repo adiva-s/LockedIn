@@ -64,8 +64,8 @@ document.getElementById("start").addEventListener("click", () => {
     blockedSites: blockedSites
   }, () => {
 
-    chrome.tabs.create({
-      url: chrome.runtime.getURL("focus.html")
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.update(tabs[0].id, { url: chrome.runtime.getURL("focus.html") })
     })
 
   })
