@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const summaryInput = document.getElementById("summaryInput")
 
   summaryInput.addEventListener("input", () => {
-    summaryInput.style.border = "1px solid #ccc"
+    summaryInput.style.borderBottomColor = "var(--blue-dim)"
   })
 
   chrome.storage.local.get(["task","endTime","sessions","startTime"], data => {
@@ -37,12 +37,21 @@ document.addEventListener("DOMContentLoaded", () => {
         percent = Math.max(0, Math.min(100, percent))
 
         progressFill.style.width = percent + "%"
+        document.getElementById("bottomFill").style.width = percent + "%"
         progressText.textContent = Math.floor(percent) + "% completed"
 
         if(percent > 95){
-          progressFill.style.background = "#ef4444"
+          progressFill.style.background = "#ff3131"
+          progressFill.style.boxShadow = "0 0 8px #ff3131"
+          document.getElementById("bottomFill").style.background = "#ff3131"
+          document.getElementById("timer").classList.add("danger")
+          document.getElementById("timer").classList.remove("warning")
         } else if(percent > 80){
-          progressFill.style.background = "#f59e0b"
+          progressFill.style.background = "#ffdd00"
+          progressFill.style.boxShadow = "0 0 8px #ffdd00"
+          document.getElementById("bottomFill").style.background = "#ffdd00"
+          document.getElementById("timer").classList.add("warning")
+          document.getElementById("timer").classList.remove("danger")
         }
       }
 
@@ -50,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         timerElement.textContent = "00:00"
         status.textContent = "Did you finish your task?"
-        actions.style.display = "block"
+        actions.classList.add("show")
 
         clearInterval(intervalID)
 
@@ -74,8 +83,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // DONE BUTTON
   document.getElementById("doneBtn").onclick = () => {
-    document.getElementById("actions").style.display = "none"
-    document.getElementById("summaryBox").style.display = "block"
+    document.getElementById("actions").classList.remove("show")
+    document.getElementById("summaryBox").classList.add("show")
   }
 
   // SAVE SUMMARY
@@ -86,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const summary = summaryInput.value.trim()
 
     if(!summary){
-      summaryInput.style.border = "2px solid red"
+      summaryInput.style.borderBottomColor = "#b85a5a"
       summaryInput.placeholder = "You must write what you did 👀"
       return
     }
@@ -152,77 +161,23 @@ document.addEventListener("DOMContentLoaded", () => {
         sessionEndTime: null
       }, () => {
 
-        document.querySelector(".card").innerHTML = `
-          <div style="text-align:center; padding:10px;">
+        // Show complete screen
+        document.getElementById("focusScreen").classList.add("hidden")
+        document.getElementById("sessionLabel").textContent = "COMPLETE"
+        const cs = document.getElementById("completeScreen")
+        cs.classList.remove("hidden")
 
-            <h1>✅ Mission Complete</h1>
-
-            <p><strong id="taskDisplay"></strong></p>
-
-            <div id="summaryDisplay"
-              style="background:#f0f4ff; padding:12px; border-radius:8px; margin:10px 0;">
-            </div>
-
-            <div style="margin-top:15px; font-size:14px; color:#555;">
-              🔥 ${streak} Day Streak<br>
-              📊 Total Sessions: ${sessions.length}
-            </div>
-
-            <br>
-
-            <button id="continueBtn"
-              style="
-                  background:#4f6df5;
-                  color:white;
-                  padding:10px 16px;
-                  border:none;
-                  border-radius:6px;
-                  cursor:pointer;
-              ">
-              Start New Session
-            </button>
-
-            <button id="historyBtn"
-              style="
-                  background:#e5e7eb;
-                  color:#111;
-                  padding:10px 16px;
-                  border:none;
-                  border-radius:6px;
-                  cursor:pointer;
-                  margin-left:8px;
-              ">
-              View Progress
-            </button>
-
-            <button id="returnBtn"
-              style="
-                  background:#10b981;
-                  color:white;
-                  padding:10px 16px;
-                  border:none;
-                  border-radius:6px;
-                  cursor:pointer;
-                  margin-top:10px;
-                  width:100%;
-              ">
-              Return to Site
-            </button>
-
-          </div>
-        `
-
-        document.getElementById("summaryDisplay").textContent = "→ " + newSession.summary
-        document.getElementById("taskDisplay").textContent = newSession.task  
+        document.getElementById("completeTask").textContent = newSession.task
+        document.getElementById("completeSummary").textContent = "→ " + newSession.summary
+        document.getElementById("streakNum").textContent = streak
+        document.getElementById("sessionsNum").textContent = sessions.length
 
         document.getElementById("continueBtn").onclick = () => {
           window.location.href = chrome.runtime.getURL("popup.html")
         }
-
         document.getElementById("historyBtn").onclick = () => {
           window.location.href = chrome.runtime.getURL("history.html")
         }
-
         document.getElementById("returnBtn").onclick = () => {
           chrome.storage.local.get(["lastBlockedUrl"], data => {
             window.location.href = data.lastBlockedUrl || "https://www.google.com"
@@ -237,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ADD MORE TIME
   document.getElementById("moreBtn").onclick = () => {
-    document.getElementById("addTimeBox").style.display = "block"
+    document.getElementById("addTimeBox").classList.add("show")
   }
 
   document.getElementById("addBtn").onclick = () => {

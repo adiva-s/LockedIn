@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "FocusLock",
+  "name": "LockedIn",
   "version": "1.0",
-  "description": "Block distractions until your task is done.",
+  "description": "Lock in. Block distractions. Reflect on what you built.",
 
   "permissions": [
     "storage",

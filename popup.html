@@ -1,94 +1,167 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>FocusLock</title>
+<title>LockedIn</title>
 <meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
-body {
-  font-family: Arial;
-  margin: 0;
-  background: #f5f7fb;
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --bg2: #111111;
+  --bg3: #161616;
+  --white: #f0eeea;
+  --white-dim: #6b6860;
+  --white-dimmer: #2a2926;
+  --blue: #7b9eb8;
+  --blue-dim: #4a6a82;
+  --blue-dimmer: #1e3042;
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.12);
 }
 
-input {
-  width: 100%;
-  margin-bottom: 8px;
-}
-
-button {
-  width: 100%;
-  margin-top: 6px;
-}
-
-.card {
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+html, body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Inter', sans-serif;
   width: 320px;
-  text-align: center;
+  min-height: 100%;
 }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.wrap {
+  padding: 1.5rem;
+  animation: fadeUp .3s ease forwards;
+}
+
+/* HEADER */
+.header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1.5rem; padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.logo { font-size: 11px; font-weight: 500; letter-spacing: 0.2em; color: var(--white); text-transform: uppercase; }
+.streak-badge {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  color: var(--blue); letter-spacing: 0.05em;
+}
+
+/* SETUP FORM */
+#setup { display: flex; flex-direction: column; gap: .75rem; }
+
+.field { display: flex; flex-direction: column; gap: .35rem; }
+.field-label {
+  font-size: 9px; font-weight: 500; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--white-dim);
+}
+.field input {
+  font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 300;
+  color: var(--white); background: var(--bg2);
+  border: 1px solid var(--border); outline: none;
+  padding: .6rem .75rem; width: 100%;
+  transition: border-color .2s;
+  caret-color: var(--blue);
+}
+.field input::placeholder { color: var(--white-dimmer); }
+.field input:focus { border-color: var(--blue-dim); }
+
+.start-btn {
+  font-family: 'Inter', sans-serif; font-size: 11px;
+  font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase;
+  padding: .75rem; width: 100%; margin-top: .25rem;
+  background: var(--blue-dimmer); color: var(--blue);
+  border: 1px solid var(--blue-dim); cursor: pointer;
+  transition: background .2s, border-color .2s, color .2s;
+}
+.start-btn:hover { background: var(--blue-dim); color: var(--white); border-color: var(--blue); }
+
+/* ACTIVE STATE */
+#active {
+  display: none; flex-direction: column; gap: .75rem;
+  padding: .5rem 0;
+}
+.active-label {
+  font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--white-dim); display: flex; align-items: center; gap: 6px;
+}
+.active-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--blue); animation: blink 2s ease-in-out infinite; }
+.active-task {
+  font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 300;
+  color: var(--white); line-height: 1.5;
+}
+.active-timer {
+  font-family: 'DM Mono', monospace; font-size: 2.5rem; font-weight: 300;
+  color: var(--blue); letter-spacing: 0.02em; line-height: 1;
+}
+.end-btn {
+  font-family: 'Inter', sans-serif; font-size: 11px;
+  font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase;
+  padding: .65rem; width: 100%;
+  background: transparent; color: var(--white-dim);
+  border: 1px solid var(--white-dimmer); cursor: pointer;
+  transition: border-color .2s, color .2s;
+}
+.end-btn:hover { border-color: var(--white-dim); color: var(--white); }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--border); margin: .75rem 0; }
+
+/* HISTORY BTN */
+.history-btn {
+  font-family: 'Inter', sans-serif; font-size: 11px;
+  font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: .6rem; width: 100%;
+  background: transparent; color: var(--white-dim);
+  border: 1px solid var(--border); cursor: pointer;
+  transition: border-color .2s, color .2s;
+}
+.history-btn:hover { border-color: var(--border-hover); color: var(--white); }
 
 </style>
 </head>
-
 <body>
+<div class="wrap">
 
-<div class="card">
-<div id="setup">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">LockedIn</div>
+    <div class="streak-badge" id="streak"></div>
+  </div>
 
-<h3>FocusLock</h3>
+  <!-- SETUP -->
+  <div id="setup">
+    <div class="field">
+      <div class="field-label">Task</div>
+      <input id="task" placeholder="What are you working on?"/>
+    </div>
+    <div class="field">
+      <div class="field-label">Duration (minutes)</div>
+      <input id="minutes" type="number" placeholder="25"/>
+    </div>
+    <div class="field">
+      <div class="field-label">Block sites</div>
+      <input id="blockedSites" placeholder="twitter.com, youtube.com"/>
+    </div>
+    <button class="start-btn" id="start">Lock In</button>
+  </div>
 
-<input id="task" placeholder="Task">
+  <!-- ACTIVE -->
+  <div id="active">
+    <div class="active-label"><span class="active-dot"></span>Session Active</div>
+    <div class="active-task" id="activeTask"></div>
+    <div class="active-timer" id="timer">00:00</div>
+    <button class="end-btn" id="end">End Session</button>
+  </div>
 
-<input id="minutes" placeholder="Minutes">
-
-<input id="blockedSites" placeholder="Blocked sites (comma separated)" />
-
-<button id="start">Start Session</button>
+  <div class="divider"></div>
+  <button class="history-btn" id="viewHistory">View History</button>
 
 </div>
-
-
-<div id="active" style="display:none;">
-
-<h3>FocusLock Active 🔒</h3>
-
-<p id="activeTask"></p>
-
-<p>Time remaining: <span id="timer"></span></p>
-
-<button id="end">End Session</button>
-
-</div>
-
-<hr>
-
-<h4 id="streak"></h4>
-
-<button id="viewHistory" style="
-  width:100%;
-  margin:10px 0;
-  padding:8px;
-  border:none;
-  border-radius:6px;
-  background:#4f6df5;
-  color:white;
-  cursor:pointer;
-">
-  View Full History
-</button>
-
-<div id="history"></div>
-
-
 <script src="popup.js"></script>
-</div>
-
 </body>
 </html>

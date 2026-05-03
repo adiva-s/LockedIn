@@ -1,109 +1,262 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>FocusLock</title>
+<title>LockedIn</title>
 <meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
 
-body{
-  margin:0;
-  height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-family:sans-serif;
-  background:#f5f7fb;
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --bg2: #111111;
+  --white: #f0eeea;
+  --white-dim: #6b6860;
+  --white-dimmer: #2a2926;
+  --blue: #7b9eb8;
+  --blue-dim: #4a6a82;
+  --blue-dimmer: #1e3042;
+  --border: rgba(255,255,255,0.06);
+  --red: #b85a5a;
+  --warn: #b8956a;
 }
 
-.card{
-  background:white;
-  padding:40px;
-  border-radius:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.1);
-  text-align:center;
-  width:320px;
+html, body { height: 100%; background: var(--bg); color: var(--white); font-family: 'Inter', sans-serif; overflow: hidden; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* progress bar flicker */
+@keyframes barFlicker {
+  0%,100%  { opacity: 1; }
+  45%      { opacity: 1; }
+  46%      { opacity: 0.7; }
+  47%      { opacity: 1; }
+  80%      { opacity: 1; }
+  81%      { opacity: 0.85; }
+  82%      { opacity: 1; }
 }
 
-h1{
-  margin-bottom:10px;
+.screen {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  z-index: 1; padding: 3rem;
+  transition: opacity 0.5s ease;
 }
+.screen.hidden { opacity: 0; pointer-events: none; }
 
-.timer{
-  font-size:28px;
-  margin:20px 0;
+/* TOP BAR */
+.top-bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  padding: 1.25rem 2.5rem;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--border); z-index: 10;
 }
+.logo { font-size: 11px; font-weight: 500; letter-spacing: 0.2em; color: var(--white); text-transform: uppercase; }
+.session-status { font-size: 10px; color: var(--white-dim); letter-spacing: 0.15em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+.status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--blue); animation: blink 2.5s ease-in-out infinite; }
 
-button{
-  padding:10px 16px;
-  margin-top:10px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
+/* TASK */
+.task-line {
+  font-size: 11px; font-weight: 400; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--white-dim);
+  margin-bottom: 2.5rem; align-self: flex-start; max-width: 640px;
+  opacity: 0; animation: fadeUp .6s ease forwards .2s;
 }
+.task-line span { color: var(--white); font-weight: 500; }
 
-.progress-bar {
-  width: 100%;
-  height: 10px;
-  background: #e5e7eb;
-  border-radius: 999px;
-  margin: 15px 0;
-  overflow: hidden;
+/* TIMER */
+#timer {
+  font-family: 'DM Mono', monospace;
+  font-size: clamp(6rem, 20vw, 16rem);
+  font-weight: 300;
+  color: var(--blue);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  opacity: 0; animation: fadeUp .6s ease forwards .4s;
+  transition: color 1s ease;
 }
+#timer.warning { color: var(--warn); }
+#timer.danger { color: var(--red); }
 
+/* PROGRESS */
+.progress-wrap {
+  width: 100%; max-width: 640px; margin: 2rem 0 .5rem;
+  opacity: 0; animation: fadeUp .6s ease forwards .6s;
+}
+.progress-track {
+  width: 100%; height: 1px;
+  background: var(--white-dimmer);
+}
 #progressFill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(to right, #4f6df5, #7c8cff);
-  transition: width 0.5s ease;
+  height: 1px; width: 0%;
+  background: var(--blue);
+  transition: width .8s ease, background 1s ease;
+  animation: barFlicker 4s ease-in-out infinite;
+  transform-origin: left;
 }
+.progress-meta {
+  display: flex; justify-content: space-between;
+  margin-top: .6rem; font-size: 12px;
+  color: var(--white-dim); letter-spacing: 0.05em;
+}
+#progressText { color: var(--white-dim); }
+
+/* STATUS */
+#statusText {
+  font-size: 12px; color: var(--white-dim);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  margin-top: .25rem;
+  opacity: 0; animation: fadeUp .6s ease forwards .8s;
+}
+
+/* ACTIONS */
+#actions { display: none; flex-direction: column; align-items: center; gap: .6rem; margin-top: 2.5rem; }
+#actions.show { display: flex; animation: fadeUp .4s ease forwards; }
+
+.btn {
+  font-family: 'Inter', sans-serif; font-size: 11px;
+  font-weight: 400; letter-spacing: 0.15em; text-transform: uppercase;
+  padding: .65rem 2.5rem; background: transparent; cursor: pointer;
+  border: 1px solid var(--white-dimmer); color: var(--white-dim);
+  transition: border-color .2s, color .2s, background .2s;
+  min-width: 220px;
+}
+.btn:hover { border-color: var(--white-dim); color: var(--white); background: rgba(255,255,255,0.03); }
+.btn-primary { border-color: var(--blue-dim); color: var(--blue); }
+.btn-primary:hover { border-color: var(--blue); color: var(--blue); background: rgba(123,158,184,0.06); }
+
+/* ADD TIME */
+#addTimeBox { display: none; flex-direction: column; align-items: center; gap: .6rem; margin-top: 1rem; }
+#addTimeBox.show { display: flex; animation: fadeUp .3s ease forwards; }
+.field-wrap { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--white-dimmer); padding-bottom: 6px; }
+.field-label { font-size: 11px; color: var(--white-dimmer); letter-spacing: 0.1em; text-transform: uppercase; }
+.clean-input {
+  font-family: 'DM Mono', monospace; font-size: 14px;
+  color: var(--white); background: transparent; border: none; outline: none;
+  width: 160px; caret-color: var(--white); letter-spacing: 0.04em;
+}
+.clean-input::placeholder { color: var(--white-dimmer); }
+
+/* SUMMARY */
+#summaryBox { display: none; flex-direction: column; align-items: flex-start; gap: .75rem; margin-top: 2rem; width: 100%; max-width: 500px; }
+#summaryBox.show { display: flex; animation: fadeUp .4s ease forwards; }
+.field-label-block { font-size: 11px; color: var(--white-dim); letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; }
+#summaryInput {
+  font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 300;
+  color: var(--white); background: transparent; border: none;
+  border-bottom: 1px solid var(--white-dimmer); outline: none;
+  padding: .4rem 0; width: 100%; caret-color: var(--white);
+  transition: border-color .2s;
+}
+#summaryInput::placeholder { color: var(--white-dimmer); font-weight: 300; }
+#summaryInput:focus { border-color: var(--white-dim); }
+
+/* BOTTOM BAR */
+.bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 1px; background: var(--white-dimmer); z-index: 10; }
+#bottomFill {
+  height: 100%; width: 0%;
+  background: var(--blue);
+  transition: width .8s ease, background 1s ease;
+  animation: barFlicker 4s ease-in-out infinite;
+}
+
+/* COMPLETE SCREEN */
+#completeScreen { text-align: center; gap: 1.25rem; }
+.complete-label { font-size: 10px; color: var(--white-dimmer); letter-spacing: 0.25em; text-transform: uppercase; }
+.complete-title {
+  font-family: 'DM Mono', monospace; font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: 300; color: var(--blue); line-height: 1;
+  letter-spacing: -0.01em; margin-bottom: .5rem;
+}
+.complete-task { font-size: 12px; color: var(--white-dim); letter-spacing: 0.08em; text-transform: uppercase; }
+.complete-task span { color: var(--white); }
+.complete-summary {
+  font-size: 13px; color: var(--white-dim); font-weight: 300;
+  border-left: 1px solid var(--white-dimmer); padding-left: 1rem;
+  text-align: left; max-width: 460px; line-height: 1.9;
+  margin: .5rem auto 1.5rem;
+}
+.complete-stats { display: flex; gap: 4rem; margin-bottom: 2rem; justify-content: center; }
+.stat-block { text-align: center; }
+.stat-num {
+  font-family: 'DM Mono', monospace; font-size: 3.5rem;
+  font-weight: 300; color: var(--blue); line-height: 1;
+}
+.stat-label { font-size: 9px; color: var(--white-dimmer); letter-spacing: 0.15em; text-transform: uppercase; margin-top: .3rem; }
+.complete-btns { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: center; }
 
 </style>
 </head>
-
 <body>
 
-<div class="card">
-
-<h1> Focus Mode</h1>
-
-<p id="taskText"></p>
-
-<div class="timer" id="timer"></div>
-
-<div class="progress-bar">
-  <div id="progressFill"></div>
-</div>
-<p id="progressText"></p> 
-
-<p id="statusText">Finish the mission first.</p>
-
-<div id="actions" style="display:none;">
-
-<button id="doneBtn">Task Finished</button>
-
-<button id="moreBtn">Add Time</button>
-
+<div class="top-bar">
+  <div class="logo">LockedIn</div>
+  <div class="session-status"><span class="status-dot"></span><span id="sessionLabel">Session Active</span></div>
 </div>
 
-<div id="addTimeBox" style="display:none;">
+<!-- FOCUS SCREEN -->
+<div class="screen" id="focusScreen">
+  <div class="task-line">Task — <span id="taskText"></span></div>
+  <div id="timer">00:00</div>
+  <div class="progress-wrap">
+    <div class="progress-track"><div id="progressFill"></div></div>
+    <div class="progress-meta">
+      <span>0%</span>
+      <span id="progressText">0% elapsed</span>
+      <span>100%</span>
+    </div>
+  </div>
+  <div id="statusText">Finish the mission first.</div>
 
-<input id="extraMinutes" placeholder="Minutes">
+  <div id="actions">
+    <button class="btn btn-primary" id="doneBtn">Task Finished</button>
+    <button class="btn" id="moreBtn">Add Time</button>
+  </div>
 
-<button id="addBtn">Add</button>
+  <div id="addTimeBox">
+    <div class="field-wrap">
+      <span class="field-label">Minutes</span>
+      <input class="clean-input" id="extraMinutes" placeholder="enter amount"/>
+    </div>
+    <button class="btn btn-primary" style="margin-top:.5rem;" id="addBtn">Extend Session</button>
+  </div>
 
+  <div id="summaryBox">
+    <div class="field-label-block">What did you accomplish?</div>
+    <input id="summaryInput" placeholder="Write your reflection..."/>
+    <button class="btn btn-primary" id="saveSummary">Log Session</button>
+  </div>
 </div>
 
-<div id="summaryBox" style="display:none;">
-
-<input id="summaryInput" placeholder="What did you complete?">
-
-<button id="saveSummary">Save</button>
-
+<!-- COMPLETE SCREEN -->
+<div class="screen hidden" id="completeScreen">
+  <div class="complete-label">Session complete</div>
+  <div class="complete-title">Well done.</div>
+  <div class="complete-task">Task — <span id="completeTask"></span></div>
+  <div class="complete-summary" id="completeSummary"></div>
+  <div class="complete-stats">
+    <div class="stat-block">
+      <div class="stat-num" id="streakNum">0</div>
+      <div class="stat-label">Day Streak</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num" id="sessionsNum">0</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+  </div>
+  <div class="complete-btns">
+    <button class="btn btn-primary" id="continueBtn">New Session</button>
+    <button class="btn" id="historyBtn">View Progress</button>
+    <button class="btn" id="returnBtn">Return to Site</button>
+  </div>
 </div>
 
-</div>
+<div class="bottom-bar"><div id="bottomFill"></div></div>
 
 <script src="focus.js"></script>
-
 </body>
 </html>

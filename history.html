@@ -2,235 +2,189 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>FocusLock History</title>
-
+<title>LockedIn — History</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
-body{
-  font-family:sans-serif;
-  background:#f5f7fb;
-  display:flex;
-  justify-content:center;
-  padding:40px;
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --bg2: #111111;
+  --bg3: #161616;
+  --white: #ffffff;
+  --white-dim: #a8a49e;
+  --white-dimmer: #4a4744;
+  --blue: #7b9eb8;
+  --blue-dim: #4a6a82;
+  --blue-dimmer: #1e3042;
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.1);
 }
 
-.container{
-  width:500px;
+html, body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
 }
 
-.card{
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.1);
-  margin-bottom:15px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-}
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
-.header{
-  text-align:center;
-  margin-bottom:20px;
-}
-
+/* TOP BAR */
 .top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
+  position: sticky; top: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 2rem;
+  display: flex; justify-content: space-between; align-items: center;
+  z-index: 10;
 }
+.logo { font-size: 11px; font-weight: 500; letter-spacing: 0.2em; color: var(--white); text-transform: uppercase; }
+.top-actions { display: flex; gap: .5rem; align-items: center; }
 
-button {
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: 500;
+.btn-sm {
+  font-family: 'Inter', sans-serif; font-size: 10px;
+  font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: .45rem .9rem; background: transparent; cursor: pointer;
+  border: 1px solid var(--border); color: var(--white-dim);
+  transition: border-color .2s, color .2s;
 }
+.btn-sm:hover { border-color: var(--border-hover); color: var(--white); }
+.btn-back { color: var(--blue); border-color: var(--blue-dimmer); }
+.btn-back:hover { border-color: var(--blue-dim); color: var(--blue); }
 
-.right-actions {
-  display: flex;
-  gap: 10px;
+/* CONTAINER */
+.container { max-width: 680px; margin: 0 auto; padding: 2.5rem 2rem 4rem; animation: fadeUp .4s ease forwards; }
+
+/* HERO STATS */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--border);
+  border: 1px solid var(--border);
+  margin-bottom: 2rem;
 }
+.stat-cell {
+  background: var(--bg); padding: 1.25rem 1rem;
+  transition: background .2s;
+}
+.stat-cell:hover { background: var(--bg2); }
+.stat-label { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--white-dimmer); margin-bottom: .4rem; }
+.stat-val { font-family: 'DM Mono', monospace; font-size: 1.8rem; font-weight: 400; color: var(--blue); line-height: 1; }
+.stat-sub { font-size: 10px; color: var(--white-dimmer); margin-top: .2rem; }
 
-/* Toggle bar */
+/* STREAK */
+.streak-row {
+  font-family: 'DM Mono', monospace; font-size: 15px;
+  color: var(--white-dim); letter-spacing: 0.05em;
+  margin-bottom: 1.5rem; padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.streak-row span { color: var(--blue); }
+
+/* TOGGLE */
 .toggle-bar {
-  display: flex;
-  background: white;
-  border-radius: 8px;
-  padding: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  margin-bottom: 20px;
-  gap: 4px;
+  display: flex; gap: 1px; background: var(--border);
+  border: 1px solid var(--border); margin-bottom: 1.5rem;
 }
-
 .toggle-btn {
-  flex: 1;
-  padding: 8px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  background: transparent;
-  color: #555;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.15s;
+  flex: 1; padding: .55rem; background: var(--bg);
+  border: none; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-size: 11px;
+  font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--white-dim); transition: background .15s, color .15s;
 }
+.toggle-btn:hover { color: var(--white); }
+.toggle-btn.active { background: var(--bg3); color: var(--blue); }
 
-.toggle-btn.active {
-  background: #4f6df5;
-  color: white;
-}
-
-/* Group cards */
+/* GROUP CARDS */
 .group-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  margin-bottom: 16px;
-  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 1px; overflow: hidden;
 }
-
 .group-header {
-  padding: 16px 20px;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding: 1rem 1.25rem; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--bg); transition: background .15s;
   user-select: none;
 }
-
-.group-header:hover { background: #f9fafb; }
-
-.group-title {
-  font-weight: 600;
-  font-size: 15px;
-  color: #111;
-}
-
-.group-stats {
-  display: flex;
-  gap: 12px;
-  font-size: 12px;
-  color: #888;
-  margin-top: 4px;
-}
-
-.group-arrow {
-  color: #aaa;
-  font-size: 12px;
-  transition: transform 0.2s;
-}
-
+.group-header:hover { background: var(--bg2); }
+.group-title { font-size: 15px; font-weight: 500; color: var(--white); margin-bottom: .2rem; }
+.group-stats { display: flex; gap: 1rem; font-size: 12px; color: var(--white-dim); font-family: 'DM Mono', monospace; }
+.group-arrow { font-size: 10px; color: var(--white-dimmer); transition: transform .2s; }
 .group-arrow.open { transform: rotate(180deg); }
-
-.group-sessions {
-  border-top: 1px solid #f0f0f0;
-  display: none;
-}
-
+.group-sessions { border-top: 1px solid var(--border); display: none; }
 .group-sessions.open { display: block; }
 
+/* SESSION ITEMS */
 .session-item {
-  padding: 14px 20px;
-  border-bottom: 1px solid #f5f5f5;
+  padding: .9rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  transition: background .15s;
 }
-
 .session-item:last-child { border-bottom: none; }
+.session-item:hover { background: var(--bg2); }
+.session-task { font-size: 14px; font-weight: 500; color: var(--white); margin-bottom: .2rem; }
+.session-meta { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--white-dim); margin-bottom: .5rem; letter-spacing: 0.04em; }
+.session-summary { font-size: 13px; color: var(--white-dim); font-weight: 400; border-left: 1px solid var(--white-dimmer); padding-left: .75rem; line-height: 1.7; }
 
-.session-task {
-  font-weight: 500;
-  font-size: 14px;
-  color: #222;
-}
+/* EMPTY */
+.empty { text-align: center; padding: 3rem; font-size: 13px; color: var(--white-dimmer); letter-spacing: 0.05em; }
 
-.session-meta {
-  font-size: 12px;
-  color: #aaa;
-  margin: 2px 0 6px;
-}
-
-.session-summary {
-  font-size: 13px;
-  color: #555;
-  background: #f8f9ff;
-  padding: 8px 10px;
-  border-radius: 6px;
-}
 </style>
 </head>
-
 <body>
 
-<div class="container">
+<!-- TOP BAR -->
 <div class="top-bar">
-    <button id="backBtn" style="
-        margin-bottom:15px;
-        padding:8px 12px;
-        border:none;
-        border-radius:6px;
-        background:#4f6df5;
-        color:white;
-        cursor:pointer;
-        ">
-        ← Back to Focus
-    </button>
-
-    <div class="right-actions">
-    <button id="exportBtn" style="
-        margin-bottom:15px;
-        margin-left:8px;
-        padding:8px 12px;
-        border:none;
-        border-radius:6px;
-        background:#024d22;
-        color:white;
-        cursor:pointer;
-        ">
-        ⬇️ Export History
-    </button>
-
-    <button id="importBtn" style="
-        margin-bottom:15px;
-        margin-left:8px;
-        padding:8px 12px;
-        border:none;
-        border-radius:6px;
-        background:#ea580c;
-        color:white;
-        cursor:pointer;
-        ">
-        ⬆️ Import History
-    </button>
-
+  <div class="logo">LockedIn</div>
+  <div class="top-actions">
+    <button class="btn-sm" id="exportBtn">Export</button>
+    <button class="btn-sm" id="importBtn">Import</button>
     <input id="importFile" type="file" accept=".json" style="display:none;">
+    <button class="btn-sm btn-back" id="backBtn">← Back</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- STREAK -->
+  <div class="streak-row" id="streakRow"></div>
+
+  <!-- STATS GRID -->
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-cell">
+      <div class="stat-label">Total Sessions</div>
+      <div class="stat-val" id="s-sessions">—</div>
     </div>
-</div>
+    <div class="stat-cell">
+      <div class="stat-label">Focus Time</div>
+      <div class="stat-val" id="s-time">—</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-label">Avg Session</div>
+      <div class="stat-val" id="s-avg">—</div>
+      <div class="stat-sub">minutes</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-label">Best Day</div>
+      <div class="stat-val" id="s-best">—</div>
+    </div>
+  </div>
 
-<div class="header">
-  <h1>📖 Focus History</h1>
-  <h3 id="streak"></h3>
-</div>
+  <!-- TOGGLE -->
+  <div class="toggle-bar">
+    <button class="toggle-btn active" data-view="day">Day</button>
+    <button class="toggle-btn" data-view="week">Week</button>
+    <button class="toggle-btn" data-view="month">Month</button>
+  </div>
 
-<div id="stats" style="
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 8px 20px rgba(0,0,0,0.08);
-  margin-bottom:20px;
-  text-align:center;
-"></div>
-
-<!-- Toggle bar -->
-<div class="toggle-bar">
-  <button class="toggle-btn active" data-view="day">Day</button>
-  <button class="toggle-btn" data-view="week">Week</button>
-  <button class="toggle-btn" data-view="month">Month</button>
-</div>
-
-<div id="history"></div>
+  <!-- HISTORY -->
+  <div id="history"></div>
 
 </div>
 
 <script src="history.js"></script>
-
 </body>
 </html>

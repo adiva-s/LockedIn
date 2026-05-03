@@ -66,7 +66,7 @@ function renderHistory(sessions, view){
   historyDiv.innerHTML = ""
 
   if(sessions.length === 0){
-    historyDiv.innerHTML = `<p style="text-align:center;color:#aaa;">No sessions yet!</p>`
+    historyDiv.innerHTML = '<div class="empty">No sessions yet.</div>'
     return
   }
 
@@ -103,9 +103,9 @@ function renderHistory(sessions, view){
       <div>
         <div class="group-title">${key}</div>
         <div class="group-stats">
-          <span>📊 ${sessionCount} session${sessionCount !== 1 ? "s" : ""}</span>
-          <span>⏱️ ${totalTime} min</span>
-          <span>📝 ${uniqueTasks} task${uniqueTasks !== 1 ? "s" : ""}</span>
+          <span>${sessionCount} session${sessionCount !== 1 ? "s" : ""}</span>
+          <span>${totalTime} min</span>
+          <span>${uniqueTasks} task${uniqueTasks !== 1 ? "s" : ""}</span>
         </div>
       </div>
       <span class="group-arrow ${index === 0 ? "open" : ""}">▼</span>
@@ -127,7 +127,7 @@ function renderHistory(sessions, view){
       item.className = "session-item"
       item.innerHTML = `
         <div class="session-task"></div>
-        <div class="session-meta">${view !== "day" ? dateStr + " · " : ""}${time} · ⏱️ ${s.duration || "?"} min</div>
+        <div class="session-meta">${view !== "day" ? dateStr + " · " : ""}${time} · ${s.duration || "?"} min</div>
         <div class="session-summary">→ <span></span></div>
       `
       item.querySelector(".session-task").textContent = s.task || "No task"
@@ -157,7 +157,6 @@ chrome.storage.local.get(["sessions"], data => {
 
   const allSessions = data.sessions || []
   const sessions = allSessions.filter(s => !IGNORED_DATES.some(d => s.date.startsWith(d)))
-  const statsDiv = document.getElementById("stats")
   const totalSessions = sessions.length
 
   const uniqueDays = new Set(
@@ -211,16 +210,14 @@ chrome.storage.local.get(["sessions"], data => {
   const hours = Math.floor(totalMinutes / 60)
   const mins = totalMinutes % 60
 
-  statsDiv.innerHTML = `
-    <h2>📊 Stats</h2>
-    <p><strong>Activity:</strong> ${totalDays} days • ${totalSessions} sessions</p>
-    <p><strong>Total Focus Time:</strong> ${hours}h ${mins}m</p>
-    <p><strong>Avg Session:</strong> ${avgMinutes} min</p>
-    <p><strong>Best Day:</strong> ${bestDayText}</p>`
+  document.getElementById("s-sessions").textContent = totalSessions
+  document.getElementById("s-time").textContent = hours + "h " + mins + "m"
+  document.getElementById("s-avg").textContent = avgMinutes
+  document.getElementById("s-best").textContent = formattedBestDay || "—"
 
   const streak = calculateStreak(sessions)
-  document.getElementById("streak").textContent = `🔥 ${streak} Day Streak`
-
+  const streakRow = document.getElementById("streakRow")
+  if(streakRow) streakRow.innerHTML = "Current streak — <span>" + streak + " day" + (streak !== 1 ? "s" : "") + "</span>"
   // Render with default view
   let currentView = "day"
   renderHistory(sessions, currentView)
@@ -239,7 +236,7 @@ chrome.storage.local.get(["sessions"], data => {
 
 // --- Nav ---
 document.getElementById("backBtn").onclick = () => {
-  window.location.href = "popup.html"
+  window.location.href = chrome.runtime.getURL("popup.html")
 }
 
 // --- Export ---
@@ -253,7 +250,7 @@ document.getElementById("exportBtn").onclick = () => {
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = "focuslock-backup.json"
+    a.download = "lockedin-backup.json"
     a.click()
     URL.revokeObjectURL(url)
   })

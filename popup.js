@@ -61,7 +61,8 @@ document.getElementById("start").addEventListener("click", () => {
     task: task,
     endTime: endTime,
     startTime: Date.now(),
-    blockedSites: blockedSites
+    blockedSites: blockedSites,
+    lastBlockedUrl: null
   }, () => {
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -106,11 +107,7 @@ function calculateStreak(sessions){
 }
 
 document.getElementById("viewHistory").onclick = () => {
-
-  chrome.tabs.create({
-    url: chrome.runtime.getURL("history.html")
-  })
-
+  window.location.href = chrome.runtime.getURL("history.html")
 }
 
 
@@ -123,7 +120,7 @@ chrome.storage.local.get(["sessions"], data => {
   const streakText = document.getElementById("streak")
 
   if(streakText){
-    streakText.textContent = "🔥 " + streak + " Day Streak"
+    streakText.textContent = streak + " day streak"
   }
 
 })
