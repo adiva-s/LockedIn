@@ -195,7 +195,7 @@ html, body { height: 100%; background: var(--bg); color: var(--white); font-fami
 
 <div class="top-bar">
   <div class="logo">LockedIn</div>
-  <div class="session-status"><span class="status-dot"></span><span id="sessionLabel">Session Active</span></div>
+  <div class="session-status"><span class="status-dot" id="statusDot"></span><span id="sessionLabel">Session Active</span></div>
 </div>
 
 <!-- FOCUS SCREEN -->
@@ -211,6 +211,10 @@ html, body { height: 100%; background: var(--bg); color: var(--white); font-fami
     </div>
   </div>
   <div id="statusText">Finish the mission first.</div>
+
+  <div style="margin-top:1.5rem;">
+    <button class="btn" id="pauseBtn" style="min-width:160px;">Pause</button>
+  </div>
 
   <div id="actions">
     <button class="btn btn-primary" id="doneBtn">Task Finished</button>

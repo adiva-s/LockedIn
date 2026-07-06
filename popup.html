@@ -74,6 +74,70 @@ html, body {
 .field input::placeholder { color: var(--white-dimmer); }
 .field input:focus { border-color: var(--blue-dim); }
 
+/* SAVED SITES CHIPS */
+.chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin-top: .25rem;
+}
+.chip {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  padding: .25rem .5rem;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--white-dim);
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  user-select: none;
+}
+.chip:hover { border-color: var(--blue-dim); color: var(--white); }
+.chip.selected {
+  background: var(--blue-dimmer);
+  border-color: var(--blue-dim);
+  color: var(--blue);
+}
+.chip .chip-remove {
+  font-size: 10px;
+  color: var(--white-dimmer);
+  line-height: 1;
+  padding: 0 1px;
+  transition: color .15s;
+}
+.chip .chip-remove:hover { color: var(--white); }
+
+/* ADD SITE ROW */
+.add-site-row {
+  display: flex;
+  gap: .35rem;
+  margin-top: .1rem;
+}
+.add-site-row input {
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 300;
+  color: var(--white); background: var(--bg2);
+  border: 1px solid var(--border); outline: none;
+  padding: .4rem .6rem; flex: 1;
+  transition: border-color .2s;
+  caret-color: var(--blue);
+}
+.add-site-row input::placeholder { color: var(--white-dimmer); }
+.add-site-row input:focus { border-color: var(--blue-dim); }
+.add-site-btn {
+  font-family: 'Inter', sans-serif; font-size: 10px;
+  font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: .4rem .65rem;
+  background: transparent; color: var(--white-dim);
+  border: 1px solid var(--border); cursor: pointer;
+  transition: border-color .2s, color .2s;
+  white-space: nowrap;
+}
+.add-site-btn:hover { border-color: var(--blue-dim); color: var(--blue); }
+
 .start-btn {
   font-family: 'Inter', sans-serif; font-size: 11px;
   font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase;
@@ -149,7 +213,13 @@ html, body {
     </div>
     <div class="field">
       <div class="field-label">Block sites</div>
-      <input id="blockedSites" placeholder="twitter.com, youtube.com"/>
+      <!-- saved chips -->
+      <div class="chips-row" id="chipsRow"></div>
+      <!-- add new site -->
+      <div class="add-site-row">
+        <input id="newSiteInput" placeholder="add a site..."/>
+        <button class="add-site-btn" id="addSiteBtn">+ save</button>
+      </div>
     </div>
     <button class="start-btn" id="start">Lock In</button>
   </div>
