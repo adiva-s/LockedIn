@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("pauseBtn").addEventListener("click", () => {
       if (!isPaused) {
-        // PAUSE
+        // PAUSE — store remaining ms so resume is drift-free
         isPaused = true
         clearInterval(intervalID)
         updatePauseBtn()
@@ -102,17 +102,15 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("statusDot").style.opacity = "0.4"
         status.textContent = "Paused. Come back when you're ready."
 
-        chrome.storage.local.set({ pausedAt: Date.now() })
+        const remainingMs = endTime - Date.now()
+        chrome.storage.local.set({ pausedAt: Date.now(), remainingMs })
 
       } else {
-        // RESUME
-        chrome.storage.local.get(["pausedAt", "endTime"], resumeData => {
-          const pausedAt = resumeData.pausedAt
-          const pausedDuration = Date.now() - pausedAt
-
-          // Shift endTime forward by how long we were paused
-          endTime = resumeData.endTime + pausedDuration
-          chrome.storage.local.set({ endTime, pausedAt: null })
+        // RESUME — rebuild endTime from stored remainingMs, no drift
+        chrome.storage.local.get(["remainingMs"], resumeData => {
+          const remaining = resumeData.remainingMs || (endTime - Date.now())
+          endTime = Date.now() + remaining
+          chrome.storage.local.set({ endTime, pausedAt: null, remainingMs: null })
 
           isPaused = false
           updatePauseBtn()
@@ -197,7 +195,8 @@ document.addEventListener("DOMContentLoaded", () => {
         focusLock: false,
         startTime: null,
         sessionEndTime: null,
-        pausedAt: null
+        pausedAt: null,
+        remainingMs: null
       }, () => {
         document.getElementById("focusScreen").classList.add("hidden")
         document.getElementById("sessionLabel").textContent = "COMPLETE"
